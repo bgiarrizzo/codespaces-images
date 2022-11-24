@@ -9,7 +9,7 @@ ARG NODE_VERSION="lts/*"
 
 # Install fontconfig + Hack Nerd Font
 RUN apt-get update \
-    && mkdir /workspaces/app/ \
+    && mkdir -p /workspaces/app/ \
     && apt-get -y install --no-install-recommends fontconfig bat exa \
     && wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.2.2/Hack.zip \
     && unzip Hack.zip -d /usr/share/fonts/truetype \
