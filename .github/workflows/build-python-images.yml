@@ -1,0 +1,42 @@
+name: Build Python
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "python/**"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "python/**"
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Login to Github Packages
+        run: docker login ghcr.io -u ${GITHUB_ACTOR} -p ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build 3.10 image
+        run: >-
+          docker build 
+          --build-args VARIANT=3.10-bullseye
+          --tag ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.10
+          -f python/3.10/Dockerfile .
+      
+      - name: Build 3.11 image
+        run: >-
+          docker build 
+          --build-args VARIANT=3.11-bullseye
+          --tag ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.11
+          -f python/3.11/Dockerfile .
+
+      - name: Push the Docker image
+        run: |-
+          docker push ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.10
+          docker push ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.11
