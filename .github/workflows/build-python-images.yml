@@ -29,14 +29,14 @@ jobs:
           docker build 
           --build-arg VARIANT=3.10-bullseye
           --tag ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.10
-          -f python/3.10/Dockerfile .
+          -f python/Dockerfile .
       
       - name: Build 3.11 image
         run: >-
           docker build 
           --build-arg VARIANT=3.11-bullseye
           --tag ghcr.io/${GITHUB_REPOSITORY}/${{ github.event.repository.name }}/python:3.11
-          -f python/3.11/Dockerfile .
+          -f python/Dockerfile .
 
       - name: Push the Docker image
         run: |-
