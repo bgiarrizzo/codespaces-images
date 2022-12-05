@@ -21,31 +21,39 @@ jobs:
     steps:
       - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
 
-      - name: Login to Github Packages
-        run: docker login ghcr.io -u ${GITHUB_ACTOR} -p ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f75d088332b07a08afadf6ac53c74509b9453f12 # date: 2022-11-05
+        with:
+          registry: ghcr.io
+          username: ${{ GITHUB_ACTOR }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Docker Builder
-        run: docker buildx create --name mybuilder --driver docker-container --bootstrap --use
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@38836d31bd1e0f8f29b8c7ad0412da32020f15b3 # date: 2022-11-05
+        with:
+          platforms: linux/amd64, linux/arm64
 
-      - name: Build 3.10 image
-        run: >-
-          docker buildx build
-          --platform linux/amd64,linux/arm64
-          --build-arg VARIANT="3.10-bullseye"
-          --tag ghcr.io/${GITHUB_REPOSITORY}/python:3.10
-          --file python/Dockerfile 
-          --push .
-      
-      - name: Build 3.11 image
-        run: >-
-          docker buildx build
-          --platform linux/amd64,linux/arm64
-          --build-arg VARIANT="3.11-bullseye"
-          --tag ghcr.io/${GITHUB_REPOSITORY}/python:3.11
-          --file python/Dockerfile 
-          --push .
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
+        with:
+          platforms: linux/amd64, linux/arm64
 
-      # - name: Push the Docker image
-      #   run: |-
-      #     docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.10
-      #     docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.11
+      # - name: Build and push 3.10 image
+      #   uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
+      #   with:
+      #     context: .
+      #     push: true
+      #     file: python/Dockerfile
+      #     platforms: linux/amd64,linux/arm64
+      #     build-args: VARIANT="3.10-bullseye"
+      #     tags: ghcr.io/${GITHUB_REPOSITORY}/python:3.10
+
+      - name: Build and push 3.11 image
+        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
+        with:
+          context: .
+          push: true
+          file: python/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VARIANT="3.11-bullseye"
+          tags: ghcr.io/${GITHUB_REPOSITORY}/python:3.11
