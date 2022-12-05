@@ -15,7 +15,7 @@ on:
       - ".github/workflows/build-python-images.yml"
 
 jobs:
-  Build:
+  BuildAMD64:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,19 +26,23 @@ jobs:
 
       - name: Build 3.10 image
         run: >-
-          docker build 
-          --build-arg VARIANT=3.10-bullseye
+          docker buildx build
+          --platform linux/amd64,linux/arm64,linux/arm/v7
+          --build-arg VARIANT="3.10-bullseye"
           --tag ghcr.io/${GITHUB_REPOSITORY}/python:3.10
-          -f python/Dockerfile .
+          --file python/Dockerfile 
+          --push .
       
       - name: Build 3.11 image
         run: >-
-          docker build 
-          --build-arg VARIANT=3.11-bullseye
+          docker buildx build
+          --platform linux/amd64,linux/arm64,linux/arm/v7
+          --build-arg VARIANT="3.11-bullseye"
           --tag ghcr.io/${GITHUB_REPOSITORY}/python:3.11
-          -f python/Dockerfile .
+          --file python/Dockerfile 
+          --push .
 
-      - name: Push the Docker image
-        run: |-
-          docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.10
-          docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.11
+      # - name: Push the Docker image
+      #   run: |-
+      #     docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.10
+      #     docker push ghcr.io/${GITHUB_REPOSITORY}/python:3.11
