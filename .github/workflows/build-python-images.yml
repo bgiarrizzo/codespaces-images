@@ -24,6 +24,9 @@ jobs:
       - name: Login to Github Packages
         run: docker login ghcr.io -u ${GITHUB_ACTOR} -p ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create Docker Builder
+        run: docker buildx create --name mybuilder --driver docker-container --bootstrap --use
+
       - name: Build 3.10 image
         run: >-
           docker buildx build
