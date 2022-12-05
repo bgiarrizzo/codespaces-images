@@ -55,5 +55,5 @@ jobs:
           push: true
           file: python/Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: VARIANT="3.11-bullseye"
+          build-args: VARIANT=3.11-bullseye
           tags: "${{ github.repository }}/python:3.11"
