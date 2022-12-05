@@ -56,4 +56,6 @@ jobs:
           file: python/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VARIANT="3.11-bullseye"
-          tags: ghcr.io/${{ GITHUB_REPOSITORY }}/python:3.11
+          tags: ghcr.io/$repo/python:3.11
+        env:
+          repo: ${GITHUB_REPOSITORY}
