@@ -46,7 +46,7 @@ jobs:
           file: python/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VARIANT=3.10-bullseye
-          tags: "${{ github.repository }}/python:3.10"
+          tags: "ghcr.io/${{ github.repository }}/python:3.10"
 
       - name: Build and push 3.11 image
         uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
@@ -56,4 +56,4 @@ jobs:
           file: python/Dockerfile
           platforms: linux/amd64,linux/arm64
           build-args: VARIANT=3.11-bullseye
-          tags: "${{ github.repository }}/python:3.11"
+          tags: "ghcr.io/${{ github.repository }}/python:3.11"
