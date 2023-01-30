@@ -12,13 +12,9 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | s
     && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
 
-# Install fontconfig + Hack Nerd Font
-RUN wget https://github.com/ryanoasis/nerd-fonts/releases/download/v2.2.2/Hack.zip \
-    && mkdir -p /workspaces/app/ \
-    && apt update && apt-get -y install --no-install-recommends fontconfig bat exa gh \
-    && ln -s /usr/bin/batcat /usr/bin/bat \
-    && unzip Hack.zip -d /usr/share/fonts/truetype \
-    && fc-cache -f -v
+RUN mkdir -p /workspaces/app/ \
+    && apt update && apt-get -y install --no-install-recommends bat exa gh \
+    && ln -s /usr/bin/batcat /usr/bin/bat
 
 # Configure Base System
 RUN python -m pip --disable-pip-version-check --no-cache-dir install --upgrade pip \
