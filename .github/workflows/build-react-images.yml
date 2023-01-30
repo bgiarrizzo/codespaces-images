@@ -1,0 +1,59 @@
+name: Build React
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "python/**"
+      - ".github/workflows/build-react-images.yml"
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "react/**"
+      - ".github/workflows/build-react-images.yml"
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@f75d088332b07a08afadf6ac53c74509b9453f12 # date: 2022-11-05
+        with:
+          registry: ghcr.io
+          username: ${GITHUB_ACTOR}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@38836d31bd1e0f8f29b8c7ad0412da32020f15b3 # date: 2022-11-05
+        with:
+          platforms: linux/amd64, linux/arm64
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
+        with:
+          platforms: linux/amd64, linux/arm64
+
+      - name: Build and push react-node-18 image
+        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
+        with:
+          context: .
+          push: true
+          file: react/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VARIANT=18-bullseye
+          tags: "ghcr.io/${{ github.repository }}/react:node-18"
+
+      - name: Build and push react-node-16 image
+        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
+        with:
+          context: .
+          push: true
+          file: react/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          build-args: VARIANT=16-bullseye
+          tags: "ghcr.io/${{ github.repository }}/react:node-16"
