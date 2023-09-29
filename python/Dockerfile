@@ -1,5 +1,5 @@
 # Variant versions availables : https://mcr.microsoft.com/v2/vscode/devcontainers/python/tags/list
-ARG VARIANT=3-bullseye
+ARG VARIANT="3"
 FROM mcr.microsoft.com/vscode/devcontainers/python:${VARIANT}
 
 ENV PYTHONUNBUFFERED 1

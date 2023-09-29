@@ -1,0 +1,17 @@
+[
+    {
+        "version": "buster",
+        "release_date": "2019-07",
+        "end_of_life": "2024-06"
+    },
+    {
+        "version": "bullseye",
+        "release_date": "2021-08",
+        "end_of_life": "2026-08"
+    },
+    {
+        "version": "bookworm",
+        "release_date": "2023-06",
+        "end_of_life": "2028-06"
+    }
+]

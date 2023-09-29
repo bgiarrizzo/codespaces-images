@@ -14,9 +14,54 @@ on:
       - "python/**"
       - ".github/workflows/build-python-images.yml"
 
+env:
+  PYTHON_IMAGE_LOCATION: python
+  PYTHON_VERSIONS_FILENAME: python-versions.json
+
 jobs:
+  ListPythonVersionsToBuild:
+    runs-on: ubuntu-latest
+    outputs:
+      python-versions: ${{ steps.list-python-versions.outputs.python-versions }}
+
+    steps:
+      - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
+
+      - name: List Python versions to build
+        id: list-python-versions
+        run: |
+          pythonVersions=$(cat $PYTHON_IMAGE_LOCATION/$PYTHON_VERSIONS_FILENAME)
+          pythonVersions="${pythonVersions//$'\n'/''}"
+          pythonVersions="${pythonVersions//$'\r'/''}"
+          echo "::set-output name=kafka-connect-versions::$pythonVersions"
+
+  ListDebianVersionsToBuild:
+    runs-on: ubuntu-latest
+    outputs:
+      debian-versions: ${{ steps.list-debian-versions.outputs.debian-versions }}
+
+    steps:
+      - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
+
+      - name: List debian versions to build
+        id: list-debian-versions
+        run: |
+          debianVersions=$(cat $debian_IMAGE_LOCATION/$debian_VERSIONS_FILENAME)
+          debianVersions="${debianVersions//$'\n'/''}"
+          debianVersions="${debianVersions//$'\r'/''}"
+          echo "::set-output name=kafka-connect-versions::$debianVersions"
+
   Build:
     runs-on: ubuntu-latest
+
+    needs: [
+      ListDebianVersionsToBuild, 
+      ListPythonVersionsToBuild
+    ]
+    strategy:
+      matrix: 
+        python-version: ${{ fromJson(needs.ListPythonVersionsToBuild.outputs.python-versions)}}
+        debian-version: ${{ fromJson(needs.ListDebianVersionsToBuild.outputs.debian-versions)}}
 
     steps:
       - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
@@ -45,15 +90,5 @@ jobs:
           push: true
           file: python/Dockerfile
           platforms: linux/amd64,linux/arm64
-          build-args: VARIANT=3.10-bullseye
-          tags: "ghcr.io/${{ github.repository }}/python:3.10"
-
-      - name: Build and push 3.11 image
-        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
-        with:
-          context: .
-          push: true
-          file: python/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: VARIANT=3.11-bullseye
-          tags: "ghcr.io/${{ github.repository }}/python:3.11"
+          build-args: VARIANT=${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
+          tags: "ghcr.io/${{ github.repository }}/python:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}"
