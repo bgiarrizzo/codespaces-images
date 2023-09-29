@@ -32,7 +32,7 @@ jobs:
         id: list-python-versions
         run: |
           pythonVersions=$(jq -c . < $PYTHON_IMAGE_LOCATION/$PYTHON_VERSIONS_FILENAME)
-          echo "::set-output name=kafka-connect-versions::$pythonVersions"
+          echo "python-versions=$pythonVersions" >> $GITHUB_OUTPUT
 
   ListDebianVersionsToBuild:
     runs-on: ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
         id: list-debian-versions
         run: |
           debianVersions=$(jq -c . < $PYTHON_IMAGE_LOCATION/$DEBIAN_VERSIONS_FILENAME)
-          echo "::set-output name=kafka-connect-versions::$debianVersions"
+          echo "debian-versions=$debianVersions" >> $GITHUB_OUTPUT
 
   BuildPythonImages:
     runs-on: ubuntu-latest
