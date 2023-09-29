@@ -14,9 +14,7 @@ RUN export DEBIAN_FRONTEND=noninteractive \
     && apt-get purge -y imagemagick imagemagick-6-common 
 
 # Configure Base System
-RUN mkdir -p /workspaces/app/ \
-    && apt-get -y install --no-install-recommends bat exa gh \
-    && ln -s /usr/bin/batcat /usr/bin/bat
+RUN mkdir -p /workspaces/app/
 
 # Configure Base Python
 RUN python -m pip --disable-pip-version-check --no-cache-dir install --upgrade pip \
