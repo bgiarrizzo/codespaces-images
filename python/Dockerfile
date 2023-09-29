@@ -6,18 +6,22 @@ ENV PYTHONUNBUFFERED 1
 # [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="lts/*"
 
-# Install Repo for Github CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+# Update APT Cache
+RUN apt update
 
-RUN mkdir -p /workspaces/app/ \
-    && apt update && apt-get -y install --no-install-recommends bat exa gh \
-    && ln -s /usr/bin/batcat /usr/bin/bat
+# Purge Non Secure Packages
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get purge -y imagemagick imagemagick-6-common 
 
 # Configure Base System
+RUN mkdir -p /workspaces/app/ \
+    && apt-get -y install --no-install-recommends bat exa gh \
+    && ln -s /usr/bin/batcat /usr/bin/bat
+
+# Configure Base Python
 RUN python -m pip --disable-pip-version-check --no-cache-dir install --upgrade pip \
-    && python -m pip --disable-pip-version-check --no-cache-dir install --upgrade pipenv
+    && python -m pip --disable-pip-version-check --no-cache-dir install --upgrade pipenv \
+    && python -m pip install --upgrade setuptools 
 
 # Clean up
 RUN apt-get autoremove -y \
@@ -26,5 +30,4 @@ RUN apt-get autoremove -y \
     && rm -rf /tmp/pip-tmp
 
 USER vscode 
-RUN mkdir -p /home/vscode/.config/gh/ \
-    && mkdir -p /home/vscode/.config/vscode-dev-containers/
+RUN mkdir -p /home/vscode/.config/vscode-dev-containers/
