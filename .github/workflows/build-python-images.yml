@@ -16,6 +16,7 @@ on:
 
 env:
   PYTHON_IMAGE_LOCATION: python
+  DEBIAN_VERSIONS_FILENAME: debian-versions.json
   PYTHON_VERSIONS_FILENAME: python-versions.json
 
 jobs:
@@ -46,7 +47,7 @@ jobs:
       - name: List debian versions to build
         id: list-debian-versions
         run: |
-          debianVersions=$(cat $debian_IMAGE_LOCATION/$debian_VERSIONS_FILENAME)
+          debianVersions=$(cat $PYTHON_IMAGE_LOCATION/$DEBIAN_VERSIONS_FILENAME)
           debianVersions="${debianVersions//$'\n'/''}"
           debianVersions="${debianVersions//$'\r'/''}"
           echo "::set-output name=kafka-connect-versions::$debianVersions"
