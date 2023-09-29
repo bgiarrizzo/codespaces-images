@@ -13,10 +13,5 @@
         "version": "3.11",
         "release_date": "2022-10",
         "end_of_life": "2027-10"
-    },
-    {
-        "version": "3.12",
-        "release_date": "2023-10",
-        "end_of_life": "2028-10"
     }
 ]
