@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "python/**"
+      - "react/**"
       - ".github/workflows/build-react-images.yml"
   pull_request:
     branches:
