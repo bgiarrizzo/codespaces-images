@@ -2,8 +2,6 @@ ARG VARIANT="3"
 FROM python:${VARIANT}
 
 ENV PYTHONUNBUFFERED 1
-
-# [Choice] Node.js version: none, lts/*, 16, 14, 12, 10
 ARG NODE_VERSION="lts/*"
 
 # Update APT Cache

@@ -1,5 +1,10 @@
 [
     {
+        "version": "3.8",
+        "release_date": "2019-10",
+        "end_of_life": "2024-10"
+    },
+    {
         "version": "3.9",
         "release_date": "2020-10",
         "end_of_life": "2025-10"

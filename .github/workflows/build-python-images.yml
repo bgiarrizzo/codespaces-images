@@ -81,6 +81,7 @@ jobs:
           platforms: ${{ env.TARGET_PLATFORMS}}
 
       - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
         with:
           platforms: ${{ env.TARGET_PLATFORMS}}
@@ -91,6 +92,8 @@ jobs:
           context: .
           push: true
           file: python/Dockerfile
-          platforms: ${{ env.TARGET_PLATFORMS}}
+          platforms: ${{ env.TARGET_PLATFORMS }}
+          builder: ${{ steps.buildx.outputs.name }}
           build-args: VARIANT=${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
           tags: "${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}"
