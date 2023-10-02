@@ -15,13 +15,18 @@ on:
       - ".github/workflows/build-python-images.yml"
 
 env:
-  PYTHON_IMAGE_LOCATION: python
+  DOCKER_REGISTRY_ADDRESS: ghcr.io/${{ github.repository }}
+  DOCKER_REGISTRY_USERNAME: ${{ github.actor }}
+  DOCKER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  DOCKER_IMAGE_NAME: python
+  PYTHON_IMAGE_FOLDER: python
   DEBIAN_VERSIONS_FILENAME: debian-versions.json
   PYTHON_VERSIONS_FILENAME: python-versions.json
+  TARGET_PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
   ListPythonVersionsToBuild:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       python-versions: ${{ steps.list-python-versions.outputs.python-versions }}
 
@@ -31,11 +36,11 @@ jobs:
       - name: List Python versions to build
         id: list-python-versions
         run: |
-          pythonVersions=$(jq -c . < $PYTHON_IMAGE_LOCATION/$PYTHON_VERSIONS_FILENAME)
+          pythonVersions=$(jq -c . < $PYTHON_IMAGE_FOLDER/$PYTHON_VERSIONS_FILENAME)
           echo "python-versions=$pythonVersions" >> $GITHUB_OUTPUT
 
   ListDebianVersionsToBuild:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       debian-versions: ${{ steps.list-debian-versions.outputs.debian-versions }}
 
@@ -49,7 +54,7 @@ jobs:
           echo "debian-versions=$debianVersions" >> $GITHUB_OUTPUT
 
   BuildPythonImages:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     needs: [
       ListDebianVersionsToBuild, 
@@ -63,29 +68,29 @@ jobs:
     steps:
       - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
 
-      - name: Login to GitHub Container Registry
+      - name: Login to Container Registry
         uses: docker/login-action@f75d088332b07a08afadf6ac53c74509b9453f12 # date: 2022-11-05
         with:
-          registry: ghcr.io
-          username: ${GITHUB_ACTOR}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.DOCKER_REGISTRY_ADDRESS }}
+          username: ${{ env.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ env.DOCKER_REGISTRY_PASSWORD }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@38836d31bd1e0f8f29b8c7ad0412da32020f15b3 # date: 2022-11-05
         with:
-          platforms: linux/amd64, linux/arm64
+          platforms: ${{ env.TARGET_PLATFORMS}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
         with:
-          platforms: linux/amd64, linux/arm64
+          platforms: ${{ env.TARGET_PLATFORMS}}
 
-      - name: Build and push 3.10 image
+      - name: Build and push ${{ matrix.python-version.version }}-${{ matrix.debian-version.version }} image
         uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
         with:
           context: .
           push: true
           file: python/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: ${{ env.TARGET_PLATFORMS}}
           build-args: VARIANT=${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
-          tags: "ghcr.io/${{ github.repository }}/python:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}"
+          tags: "${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}"
