@@ -85,12 +85,16 @@ jobs:
         uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
         with:
           platforms: ${{ env.TARGET_PLATFORMS}}
+      
+      - name: Pull latest version of image
+        uses: docker/pull-action@b8f6b1a0c1ea3d0e4f1a0b4b2c4c0d8b2f1b8e4a # date: 2022-11-05
 
       - name: Build and push ${{ matrix.python-version.version }}-${{ matrix.debian-version.version }} image
         uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
         with:
           context: .
           push: true
+          pull: true
           file: python/Dockerfile
           platforms: ${{ env.TARGET_PLATFORMS }}
           builder: ${{ steps.buildx.outputs.name }}
