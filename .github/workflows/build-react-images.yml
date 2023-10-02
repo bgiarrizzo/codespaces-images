@@ -26,7 +26,7 @@ env:
 
 jobs:
   ListNodeVersionsToBuild:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       node-versions: ${{ steps.list-node-versions.outputs.node-versions }}
 
@@ -40,7 +40,7 @@ jobs:
           echo "node-versions=$nodeVersions" >> $GITHUB_OUTPUT
 
   ListDebianVersionsToBuild:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       debian-versions: ${{ steps.list-debian-versions.outputs.debian-versions }}
 
@@ -54,7 +54,7 @@ jobs:
           echo "debian-versions=$debianVersions" >> $GITHUB_OUTPUT
 
   BuildReactImages:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     needs: [
       ListDebianVersionsToBuild, 
