@@ -86,6 +86,10 @@ jobs:
         with:
           platforms: ${{ env.TARGET_PLATFORMS }}
 
+      - name: Pull Latest images
+        run: |
+          docker pull ${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }} || true
+
       - name: Build and push ${{ matrix.python-version.version }}-${{ matrix.debian-version.version }} image
         uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
         with:
