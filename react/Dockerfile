@@ -1,25 +1,27 @@
-# [Choice] Node.js version (use -bullseye variants on local arm64/Apple Silicon): 18, 16, 14, 18-bullseye, 16-bullseye, 14-bullseye, 18-buster, 16-buster, 14-buster
-ARG VARIANT=18-bullseye
-FROM mcr.microsoft.com/devcontainers/typescript-node:${VARIANT}
+ARG VARIANT="20"
+FROM mcr.microsoft.com/devcontainers/typescript-node:1-${VARIANT}
 
 EXPOSE 3000
+ARG NODE_MODULES="tslint-to-eslint-config typescript next react react-dom"
 
-# Install Repo for Github CLI
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+# Update APT Cache
+RUN apt update
 
-RUN mkdir -p /workspaces/app/ \
-    && apt update && apt-get -y install --no-install-recommends bat exa gh \
-    && ln -s /usr/bin/batcat /usr/bin/bat
+# Purge Non Secure Packages
+RUN export DEBIAN_FRONTEND=noninteractive \
+    && apt-get purge -y imagemagick imagemagick-6-common 
+
+# Configure Base System
+RUN mkdir -p /workspaces/app/
+
+# Configure Base React
+RUN su node -c "umask 0002 && npm install -g ${NODE_MODULES}"
 
 # Clean up
 RUN apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/* \
-    && rm -rf /tmp/pip-tmp
-
-RUN su node -c "umask 0002 && npm install -g next react react-dom"
+    && rm -rf /tmp/pip-tmp \
+    && npm cache clean --force > /dev/null 2>&1
 
 WORKDIR /workspaces/app/
-

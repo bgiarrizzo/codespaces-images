@@ -1,5 +1,15 @@
 [
     {
+        "version": "3.6",
+        "release_date": "2016-12",
+        "end_of_life": "2021-12"
+    },
+    {
+        "version": "3.7",
+        "release_date": "2018-06",
+        "end_of_life": "2023-06"
+    },
+    {
         "version": "3.8",
         "release_date": "2019-10",
         "end_of_life": "2024-10"

@@ -14,46 +14,88 @@ on:
       - "react/**"
       - ".github/workflows/build-react-images.yml"
 
+env:
+  DOCKER_REGISTRY_ADDRESS: ghcr.io/${{ github.repository }}
+  DOCKER_REGISTRY_USERNAME: ${{ github.actor }}
+  DOCKER_REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+  DOCKER_IMAGE_NAME: react
+  REACT_IMAGE_FOLDER: react
+  DEBIAN_VERSIONS_FILENAME: debian-versions.json
+  NODE_VERSIONS_FILENAME: node-versions.json
+  TARGET_PLATFORMS: linux/amd64,linux/arm64
+
 jobs:
-  Build:
+  ListNodeVersionsToBuild:
     runs-on: self-hosted
+    outputs:
+      node-versions: ${{ steps.list-node-versions.outputs.node-versions }}
 
     steps:
       - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
 
-      - name: Login to GitHub Container Registry
+      - name: List Node versions to build
+        id: list-node-versions
+        run: |
+          nodeVersions=$(jq -c . < $REACT_IMAGE_FOLDER/$NODE_VERSIONS_FILENAME)
+          echo "node-versions=$nodeVersions" >> $GITHUB_OUTPUT
+
+  ListDebianVersionsToBuild:
+    runs-on: self-hosted
+    outputs:
+      debian-versions: ${{ steps.list-debian-versions.outputs.debian-versions }}
+
+    steps:
+      - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
+
+      - name: List debian versions to build
+        id: list-debian-versions
+        run: |
+          debianVersions=$(jq -c . < $REACT_IMAGE_FOLDER/$DEBIAN_VERSIONS_FILENAME)
+          echo "debian-versions=$debianVersions" >> $GITHUB_OUTPUT
+
+  BuildReactImages:
+    runs-on: self-hosted
+
+    needs: [
+      ListDebianVersionsToBuild, 
+      ListNodeVersionsToBuild
+    ]
+    strategy:
+      matrix: 
+        node-version: ${{ fromJson(needs.ListNodeVersionsToBuild.outputs.node-versions) }}
+        debian-version: ${{ fromJson(needs.ListDebianVersionsToBuild.outputs.debian-versions) }}
+
+    steps:
+      - uses: actions/checkout@bf085276cecdb0cc76fbbe0687a5a0e786646936 # date: 2022-11-21
+
+      - name: Login to Container Registry
         uses: docker/login-action@f75d088332b07a08afadf6ac53c74509b9453f12 # date: 2022-11-05
         with:
-          registry: ghcr.io
-          username: ${GITHUB_ACTOR}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.DOCKER_REGISTRY_ADDRESS }}
+          username: ${{ env.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ env.DOCKER_REGISTRY_PASSWORD }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@38836d31bd1e0f8f29b8c7ad0412da32020f15b3 # date: 2022-11-05
         with:
-          platforms: linux/amd64, linux/arm64
-
+          platforms: ${{ env.TARGET_PLATFORMS }}
+  
       - name: Set up Docker Buildx
+        id: buildx
         uses: docker/setup-buildx-action@39a1a82492fd1ad19af19d61b5f748e4cb6cd1af # date: 2022-11-05
         with:
-          platforms: linux/amd64, linux/arm64
+          platforms: ${{ env.TARGET_PLATFORMS }}
 
-      - name: Build and push react-node-18 image
+      - name: Build and push ${{ matrix.node-version.version }}-${{ matrix.debian-version.version }} image
         uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
         with:
           context: .
           push: true
-          file: react/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: VARIANT=18-bullseye
-          tags: "ghcr.io/${{ github.repository }}/react:node-18"
+          pull: true
+          file: ${{ env.REACT_IMAGE_FOLDER }}/Dockerfile
+          platforms: ${{ env.TARGET_PLATFORMS }}
+          builder: ${{ steps.buildx.outputs.name }}
+          build-args: VARIANT=${{ matrix.node-version.version }}-${{ matrix.debian-version.version }}
+          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.node-version.version }}-${{ matrix.debian-version.version }}
+          tags: "${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.node-version.version }}-${{ matrix.debian-version.version }}"
 
-      - name: Build and push react-node-16 image
-        uses: docker/build-push-action@175d02bffea74695e96b351069ac938b338802f9 # date: 2022-11-05
-        with:
-          context: .
-          push: true
-          file: react/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          build-args: VARIANT=16-bullseye
-          tags: "ghcr.io/${{ github.repository }}/react:node-16"
