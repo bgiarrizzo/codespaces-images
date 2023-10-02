@@ -50,7 +50,7 @@ jobs:
       - name: List debian versions to build
         id: list-debian-versions
         run: |
-          debianVersions=$(jq -c . < $PYTHON_IMAGE_LOCATION/$DEBIAN_VERSIONS_FILENAME)
+          debianVersions=$(jq -c . < $PYTHON_IMAGE_FOLDER/$DEBIAN_VERSIONS_FILENAME)
           echo "debian-versions=$debianVersions" >> $GITHUB_OUTPUT
 
   BuildPythonImages:
