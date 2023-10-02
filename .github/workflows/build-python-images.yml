@@ -100,5 +100,5 @@ jobs:
           platforms: ${{ env.TARGET_PLATFORMS }}
           builder: ${{ steps.buildx.outputs.name }}
           build-args: VARIANT=${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
-          cache-from: type=registry,ref=${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
+          cache-from: type=local,ref=${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}
           tags: "${{ env.DOCKER_REGISTRY_ADDRESS }}/${{ env.DOCKER_IMAGE_NAME }}:${{ matrix.python-version.version }}-${{ matrix.debian-version.version }}"
